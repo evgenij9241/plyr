@@ -1604,19 +1604,10 @@ typeof navigator === "object" && (function (global, factory) {
 
             this.elements.inputs[type] = input;
 
-            var fakeProgress = createElement('div');
-            fakeProgress.className = "fake-progress";
-            fakeProgress.innerHTML = "<div class='progress'></div>";
-
-            var con = createElement('div');
-            con.className = "group-progress";
-            con.appendChild(input);
-            con.appendChild(fakeProgress);
-
             // Set the fill for webkit now
-            controls.updateRangeFill.call(this, con);
+            controls.updateRangeFill.call(this, input);
 
-            return con;
+            return input;
         },
 
 
@@ -1808,7 +1799,9 @@ typeof navigator === "object" && (function (global, factory) {
 
                         // Set seek range value only if it's a 'natural' time event
                         if (event.type === 'timeupdate') {
-                            controls.setRange.call(this, this.elements.progress.querySelector('.group-progress'), value);
+                            controls.setRange.call(this, this.elements.inputs.seek, value);
+                            console.log(value);
+                            console.log('------');
                         }
 
                         break;
@@ -1830,7 +1823,7 @@ typeof navigator === "object" && (function (global, factory) {
         // Webkit polyfill for lower fill range
         updateRangeFill: function updateRangeFill(target) {
             // Get range from event if event passed
-            var range = target.querySelector('input');
+            var range = is.event(target) ? target.target : target;
 
             // Needs to be a valid <input type='range'>
             if (!is.element(range) || range.getAttribute('type') !== 'range') {
@@ -1845,21 +1838,20 @@ typeof navigator === "object" && (function (global, factory) {
                 var format$$1 = i18n.get('seekLabel', this.config);
                 range.setAttribute('aria-valuetext', format$$1.replace('{currentTime}', currentTime).replace('{duration}', duration));
             } else if (matches(range, this.config.selectors.inputs.volume)) {
-                var percent = target.value * 100;
+                var percent = range.value * 100;
                 range.setAttribute('aria-valuenow', percent);
                 range.setAttribute('aria-valuetext', percent + '%');
             } else {
-                range.setAttribute('aria-valuenow', target.value);
+                range.setAttribute('aria-valuenow', range.value);
             }
 
             // WebKit only
             if (!browser.isWebkit) {
                 return;
             }
-            // Set CSS custom property
-            range.style.setProperty('--value', target.value / range.max * 100 + '%');
-            target.querySelector('.progress').style.setProperty('width', target.value / range.max * 100 + '%');
 
+            // Set CSS custom property
+            range.style.setProperty('--value', range.value / range.max * 100 + '%');
         },
 
 
@@ -2470,6 +2462,7 @@ typeof navigator === "object" && (function (global, factory) {
             // Progress
             if (this.config.controls.includes('progress')) {
                 var progress = createElement('div', getAttributesFromSelector(this.config.selectors.progress));
+
                 // Seek range slider
                 progress.appendChild(controls.createRange.call(this, 'seek', {
                     id: 'plyr-seek-' + data.id
@@ -3303,7 +3296,7 @@ typeof navigator === "object" && (function (global, factory) {
         // Sprite (for icons)
         loadSprite: true,
         iconPrefix: 'plyr',
-        iconUrl: '/themes/mcqueen/assets/img/plyr.svg',
+        iconUrl: 'https://cdn.plyr.io/3.3.12/plyr.svg',
 
         // Blank video (used to prevent errors on source change)
         blankVideo: 'https://cdn.plyr.io/static/blank.mp4',
