@@ -1613,9 +1613,7 @@ typeof navigator === "object" && (function (global, factory) {
             con.appendChild(input);
             con.appendChild(fakeProgress);
 
-            // Set the fill for webkit now
             controls.updateRangeFill.call(this, con);
-
             return con;
         },
 
@@ -1831,11 +1829,14 @@ typeof navigator === "object" && (function (global, factory) {
         updateRangeFill: function updateRangeFill(target) {
             // Get range from event if event passed
             var range = target.querySelector('input');
-
+            console.log(target);
             // Needs to be a valid <input type='range'>
             if (!is.element(range) || range.getAttribute('type') !== 'range') {
+                console.log('stope');
                 return;
             }
+
+            console.log('go-next');
 
             // Set aria values for https://github.com/sampotts/plyr/issues/905
             if (matches(range, this.config.selectors.inputs.seek)) {
@@ -2655,6 +2656,12 @@ typeof navigator === "object" && (function (global, factory) {
             // Toggle fullscreen button
             if (this.config.controls.includes('fullscreen')) {
                 container.appendChild(controls.createButton.call(this, 'fullscreen'));
+            }
+
+            if (this.config.download) {
+                var download = createElement('a');
+                download.className = "plyr__control download";
+                container.appendChild(download);
             }
 
             // Larger overlaid play button
